@@ -27,8 +27,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ hn }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalImage, setModalImage] = useState<LoadedImage | null>(null);
-  // เพิ่ม state สำหรับเลือกวันที่
-  const [selectedDate, setSelectedDate] = useState<string>('all'); // 'all' หรือ date string
+  // เปลี่ยนค่าเริ่มต้นเป็น empty string เพื่อจัดการสถานะเริ่มต้น
+  const [selectedDate, setSelectedDate] = useState<string>(''); // '', 'all', หรือ date string
   const [imageGroups, setImageGroups] = useState<ImageGroup[]>([]);
   // เพิ่ม state สำหรับเก็บรูปภาพที่โหลดแล้ว
   const [loadedImageMap, setLoadedImageMap] = useState<{ [key: string]: LoadedImage }>({});
@@ -113,7 +113,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ hn }) => {
 
   // ฟังก์ชันโหลดรูปภาพทั้งหมด
   const loadAllImages = async () => {
-    if (!imagesData) return;
+    if (!imagesData || imagesData.images.length === 0) return;
 
     setLoadingImages(true);
 
@@ -147,7 +147,11 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ hn }) => {
   const fetchImages = async () => {
     setLoading(true);
     setError(null);
+    setImagesData(null);
     setLoadedImageMap({}); // รีเซ็ตรูปภาพที่โหลดแล้ว
+    setLoadedImages([]);
+    setImageGroups([]);
+    setSelectedDate(''); // รีเซ็ตวันที่ที่เลือกเป็นสถานะเริ่มต้น
     try {
       const data = await apiService.getAllImagesByHN(hn);
       setImagesData(data);
@@ -161,6 +165,11 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ hn }) => {
         createdTime: img.dates.created_time
       }));
       setLoadedImages(placeholders);
+
+      // ถ้าไม่พบรูปภาพ ให้ตั้งค่าเป็น 'all'
+      if (placeholders.length === 0) {
+        setSelectedDate('all');
+      }
     } catch (err) {
       setError('ไม่สามารถดึงข้อมูลรูปภาพได้');
       console.error('Error fetching images:', err);
@@ -175,7 +184,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ hn }) => {
       const groups = groupImagesByDate(loadedImages);
       setImageGroups(groups);
       // ตั้งค่าวันที่ล่าสุดเป็นค่าเริ่มต้น
-      if (groups.length > 0 && selectedDate === 'all') {
+      if (groups.length > 0 && selectedDate === '') {
         setSelectedDate(groups[0].date);
       }
     }
@@ -183,6 +192,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ hn }) => {
 
   // โหลดรูปภาพเมื่อเลือกวันที่
   useEffect(() => {
+    if (!selectedDate) return; // ไม่ทำงานเมื่อ selectedDate เป็น ''
+
     if (selectedDate === 'all') {
       loadAllImages();
     } else {
