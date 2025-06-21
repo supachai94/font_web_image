@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { GetAllImagesResponse, GetImageByPathRequest, GetImageByPathResponse } from '../types/api';
 
-const API_BASE_URL = 'https://test-pic.tamada.work';
+const API_BASE_URL = 'http://mcs-image-api:8000';
+// const API_BASE_URL = 'https://test-pic.tamada.work';
 
 export const apiService = {
   // ดึงข้อมูลรูปภาพทั้งหมดจาก HN
