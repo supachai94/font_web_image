@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { GetAllImagesResponse, GetImageByPathRequest, GetImageByPathResponse } from '../types/api';
 
-const API_BASE_URL = 'http://mcs-image-api:8000';
+const API_BASE_URL = 'http://192.168.1.10:8000';
 // const API_BASE_URL = 'https://test-pic.tamada.work';
 
 export const apiService = {
