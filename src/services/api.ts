@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { GetAllImagesResponse, GetImageByPathRequest, GetImageByPathResponse } from '../types/api';
 
-const API_BASE_URL = 'https://api-pictamada.tamada.work/';
+const API_BASE_URL = 'https://api-pictamada.tamada.work';
 
 export const apiService = {
   // ดึงข้อมูลรูปภาพทั้งหมดจาก HN
