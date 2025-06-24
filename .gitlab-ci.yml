@@ -1,0 +1,99 @@
+# GitLab CI/CD Pipeline สำหรับ ระบบแสดงรูปภาพผู้ป่วย
+# ส่งข้อมูลไปยัง webhook เมื่อมีการ push
+
+stages:
+  - notify
+
+# Variables
+variables:
+  NODE_VERSION: "18"
+
+# Notify webhook
+notify_webhook:
+  stage: notify
+  image: curlimages/curl:latest
+  script:
+    - |
+      curl -X POST $WEBHOOK_URL \
+        -H "Content-Type: application/json" \
+        -H "X-GitLab-Event: Push Hook" \
+        -d '{
+          "repository": {
+            "name": "$CI_PROJECT_NAME",
+            "url": "$CI_PROJECT_URL"
+          },
+          "commits": [
+            {
+              "id": "$CI_COMMIT_SHA",
+              "message": "$CI_COMMIT_MESSAGE",
+              "author": {
+                "name": "$GITLAB_USER_NAME",
+                "email": "$GITLAB_USER_EMAIL"
+              },
+              "timestamp": "$CI_COMMIT_TIMESTAMP"
+            }
+          ],
+          "branch": "$CI_COMMIT_REF_NAME",
+          "user": {
+            "name": "$GITLAB_USER_NAME",
+            "email": "$GITLAB_USER_EMAIL"
+          },
+          "project": {
+            "id": $CI_PROJECT_ID,
+            "name": "$CI_PROJECT_NAME",
+            "path": "$CI_PROJECT_PATH"
+          },
+          "object_kind": "push",
+          "event_name": "push",
+          "before": "$CI_COMMIT_BEFORE_SHA",
+          "after": "$CI_COMMIT_SHA",
+          "ref": "$CI_COMMIT_REF_NAME",
+          "checkout_sha": "$CI_COMMIT_SHA",
+          "message": "Push to $CI_COMMIT_REF_NAME",
+          "user_id": $GITLAB_USER_ID,
+          "user_name": "$GITLAB_USER_NAME",
+          "user_email": "$GITLAB_USER_EMAIL",
+          "user_avatar": "$GITLAB_USER_AVATAR_URL",
+          "project_id": $CI_PROJECT_ID,
+          "project": {
+            "id": $CI_PROJECT_ID,
+            "name": "$CI_PROJECT_NAME",
+            "description": "$CI_PROJECT_DESCRIPTION",
+            "web_url": "$CI_PROJECT_URL",
+            "avatar_url": "$CI_PROJECT_AVATAR_URL",
+            "git_ssh_url": "$CI_PROJECT_GIT_SSH_URL",
+            "git_http_url": "$CI_PROJECT_GIT_HTTP_URL",
+            "namespace": "$CI_PROJECT_NAMESPACE",
+            "visibility_level": $CI_PROJECT_VISIBILITY_LEVEL,
+            "path_with_namespace": "$CI_PROJECT_PATH",
+            "default_branch": "$CI_DEFAULT_BRANCH",
+            "homepage": "$CI_PROJECT_URL",
+            "url": "$CI_PROJECT_GIT_HTTP_URL",
+            "ssh_url": "$CI_PROJECT_GIT_SSH_URL",
+            "http_url": "$CI_PROJECT_GIT_HTTP_URL"
+          },
+          "commits": [
+            {
+              "id": "$CI_COMMIT_SHA",
+              "message": "$CI_COMMIT_MESSAGE",
+              "title": "$CI_COMMIT_TITLE",
+              "timestamp": "$CI_COMMIT_TIMESTAMP",
+              "url": "$CI_PROJECT_URL/-/commit/$CI_COMMIT_SHA",
+              "author": {
+                "name": "$GITLAB_USER_NAME",
+                "email": "$GITLAB_USER_EMAIL"
+              },
+              "added": [],
+              "modified": [],
+              "removed": []
+            }
+          ],
+          "total_commits_count": 1,
+          "push_options": {},
+          "changes": []
+        }'
+  only:
+    - main
+    - develop
+    - merge_requests
+  allow_failure: true 
